@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Environments
+.env
+.env.local
+.env.*.local
+venv/
+env/
+ENV/
+.venv/
+crewenv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Firebase / secrets
+firebase-credentials.json
+*-credentials.json
+*-service-account.json
+client_secret*.json
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# Models (large files)
+*.pkl
+*.zip
+*.pt
+*.pth
+*.onnx
