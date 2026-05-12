@@ -28,14 +28,16 @@ class StorageServiceException(CrewgoException):
         )
 
 
-# Initialize S3 client for R2
-s3_client = boto3.client(
-    "s3",
-    endpoint_url=f"https://{settings.r2_account_id}.r2.cloudflarestorage.com",
-    aws_access_key_id=settings.r2_access_key_id,
-    aws_secret_access_key=settings.r2_secret_access_key,
-    region_name="auto",
-)
+# Initialize S3 client for R2 — only if credentials are configured
+s3_client = None
+if settings.r2_account_id and settings.r2_access_key_id and settings.r2_secret_access_key:
+    s3_client = boto3.client(
+        "s3",
+        endpoint_url=f"https://{settings.r2_account_id}.r2.cloudflarestorage.com",
+        aws_access_key_id=settings.r2_access_key_id,
+        aws_secret_access_key=settings.r2_secret_access_key,
+        region_name="auto",
+    )
 
 
 def upload_file(
