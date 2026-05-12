@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     supabase_service_role_key: str = Field(..., description="Supabase service role key")
     secret_key: str = Field(..., description="JWT secret key (min 32 chars)")
 
-    # ── AI (required) ─────────────────────────────────────────────────────────
+    # ── AI ────────────────────────────────────────────────────────────────────
     groq_api_key: str = Field(..., description="Groq API key")
     groq_model: str = Field(default="llama3-70b-8192", description="Groq model")
     anthropic_api_key: str = Field(..., description="Anthropic API key")
