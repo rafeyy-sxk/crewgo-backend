@@ -1,0 +1,64 @@
+{
+  "expo": {
+    "name": "CrewGO",
+    "slug": "crewgo",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0F0F1A"
+    },
+    "scheme": "crewgo",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "pk.crewgo.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "CrewGO uses your location to find events near you.",
+        "NSCameraUsageDescription": "CrewGO uses your camera for crew reels.",
+        "NSMicrophoneUsageDescription": "CrewGO needs microphone access for video reels."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FF5A1F"
+      },
+      "package": "pk.crewgo.app",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "CAMERA",
+        "RECORD_AUDIO",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#FF5A1F"
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow CrewGO to use your location."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
