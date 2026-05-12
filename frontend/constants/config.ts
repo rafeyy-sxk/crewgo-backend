@@ -1,6 +1,6 @@
 export const API_BASE_URL = __DEV__
-  ? 'http://192.168.1.100:8000/api/v1'   // your local IP — change to your machine's IP
-  : 'https://crewgo-api.railway.app/api/v1';
+  ? 'http://192.168.1.100:8000/api/v1'   // local dev: change to your machine's IP
+  : 'https://crewgo-backend.vercel.app/api/v1'; // production
 
 export const COLORS = {
   primary: '#FF5A1F',      // CrewGO orange

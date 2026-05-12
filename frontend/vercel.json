@@ -1,0 +1,12 @@
+{
+  "buildCommand": "npx expo export --platform web",
+  "outputDirectory": "dist",
+  "framework": null,
+  "installCommand": "npm install --legacy-peer-deps",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "env": {
+    "EXPO_PUBLIC_API_URL": "https://crewgo-backend.vercel.app/api/v1"
+  }
+}
