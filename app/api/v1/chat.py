@@ -16,6 +16,8 @@ from app.core.security import get_current_user
 from app.db.client import get_supabase_client
 from app.models.chat import ChatMessageCreate, ChatMessageListResponse, ChatMessageResponse
 from app.services.ai_service import generate_daily_prompt
+from app.services.claude_service import get_crew_ai_response
+from pydantic import BaseModel
 
 logger = get_logger(__name__)
 
@@ -203,6 +205,117 @@ async def send_message(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to send message",
         )
+
+
+class AIMessageRequest(BaseModel):
+    message: str
+
+
+@router.post("/ai", response_model=ChatMessageResponse, status_code=status.HTTP_201_CREATED)
+async def send_ai_message(
+    crew_id: UUID,
+    body: AIMessageRequest,
+    current_user: dict = Depends(get_current_user),
+    supabase: Client = Depends(get_supabase_client),
+):
+    """Send a message to CrewAI (Claude) and get a context-aware response.
+
+    Claude receives full crew context: members, interests, event details,
+    and recent chat history before generating a response.
+    """
+    try:
+        # Verify membership
+        member_check = (
+            supabase.table("crew_members")
+            .select("id")
+            .eq("crew_id", str(crew_id))
+            .eq("user_id", current_user["id"])
+            .execute()
+        )
+        if not member_check.data:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not a member")
+
+        # Fetch crew
+        crew_resp = supabase.table("crews").select("*").eq("id", str(crew_id)).execute()
+        if not crew_resp.data:
+            raise CrewNotFoundException(str(crew_id))
+        crew = crew_resp.data[0]
+
+        # Fetch event
+        event_resp = (
+            supabase.table("events").select("*").eq("id", crew["event_id"]).execute()
+        )
+        event = event_resp.data[0] if event_resp.data else {}
+
+        # Fetch crew members with interests
+        members_resp = (
+            supabase.table("crew_members")
+            .select("user_id")
+            .eq("crew_id", str(crew_id))
+            .execute()
+        )
+        member_ids = [m["user_id"] for m in members_resp.data]
+        users_resp = (
+            supabase.table("users")
+            .select("id, full_name, interests")
+            .in_("id", member_ids)
+            .execute()
+        )
+        members = users_resp.data or []
+
+        # Fetch last 20 messages for context
+        msgs_resp = (
+            supabase.table("chat_messages")
+            .select("content, sender_id, message_type")
+            .eq("crew_id", str(crew_id))
+            .order("created_at", desc=True)
+            .limit(20)
+            .execute()
+        )
+        recent = list(reversed(msgs_resp.data or []))
+        # Attach sender names
+        users_dict = {u["id"]: u["full_name"] for u in members}
+        for msg in recent:
+            msg["sender_name"] = users_dict.get(msg.get("sender_id"), "Member")
+            msg["is_ai"] = msg.get("message_type") == "ai_message"
+
+        # Store user's message first
+        user_msg = {
+            "crew_id": str(crew_id),
+            "sender_id": current_user["id"],
+            "message_type": "text",
+            "content": body.message,
+            "metadata": {},
+        }
+        supabase.table("chat_messages").insert(user_msg).execute()
+
+        # Get Claude response
+        ai_text = await get_crew_ai_response(
+            user_message=body.message,
+            crew=crew,
+            event=event,
+            members=members,
+            recent_messages=recent,
+        )
+
+        # Store Claude's response
+        ai_msg = {
+            "crew_id": str(crew_id),
+            "sender_id": None,
+            "message_type": "ai_message",
+            "content": ai_text,
+            "metadata": {"model": "claude-opus-4-7"},
+        }
+        ai_resp = supabase.table("chat_messages").insert(ai_msg).execute()
+
+        logger.info(f"Claude AI responded in crew {crew_id}")
+        return ChatMessageResponse(**ai_resp.data[0])
+
+    except (CrewNotFoundException, HTTPException):
+        raise
+    except Exception as e:
+        logger.error(f"Claude AI error in crew {crew_id}: {e}")
+        raise HTTPException(status_code=500, detail="AI assistant failed")
 
 
 @router.post("/trigger-ai-prompt", response_model=ChatMessageResponse)

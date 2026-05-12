@@ -27,10 +27,16 @@ class Settings(BaseSettings):
     supabase_anon_key: str = Field(..., description="Supabase anonymous key")
     supabase_service_role_key: str = Field(..., description="Supabase service role key")
 
-    # Groq AI Configuration
+    # Groq AI Configuration (background tasks: icebreakers, daily prompts)
     groq_api_key: str = Field(..., description="Groq API key")
     groq_model: str = Field(
         default="llama3-70b-8192", description="Groq model name"
+    )
+
+    # Anthropic Claude Configuration (crew chat AI)
+    anthropic_api_key: str = Field(..., description="Anthropic API key")
+    claude_model: str = Field(
+        default="claude-opus-4-7", description="Claude model"
     )
 
     # Eventbrite Configuration
