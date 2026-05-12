@@ -56,9 +56,11 @@ class Settings(BaseSettings):
             raise ValueError("SECRET_KEY must be at least 32 characters long")
         return v
 
-    @field_validator("app_env")
+    @field_validator("app_env", mode="before")
     @classmethod
     def validate_app_env(cls, v: str) -> str:
+        # Strip BOM, whitespace, and Windows line endings (added by PowerShell pipes)
+        v = str(v).strip().lstrip('﻿').strip()
         valid = ["development", "staging", "production"]
         if v not in valid:
             raise ValueError(f"APP_ENV must be one of {valid}")
