@@ -90,12 +90,16 @@ async def fetch_eventbrite_events(
                     "image_url": event_data.get("logo", {}).get("url", ""),
                     "ticket_url": event_data.get("url", ""),
                     "is_free": event_data.get("is_free", True),
-                    "price_min": Decimal(str(event_data.get("ticket_availability", {}).get("minimum_ticket_price", {}).get("value", 0) / 100)))
-                    if event_data.get("ticket_availability", {}).get("minimum_ticket_price", {}).get("value")
-                    else None,
-                    "price_max": Decimal(str(event_data.get("ticket_availability", {}).get("maximum_ticket_price", {}).get("value", 0) / 100)))
-                    if event_data.get("ticket_availability", {}).get("maximum_ticket_price", {}).get("value")
-                    else None,
+                    "price_min": (
+                        Decimal(str(event_data.get("ticket_availability", {}).get("minimum_ticket_price", {}).get("value", 0) / 100))
+                        if event_data.get("ticket_availability", {}).get("minimum_ticket_price", {}).get("value")
+                        else None
+                    ),
+                    "price_max": (
+                        Decimal(str(event_data.get("ticket_availability", {}).get("maximum_ticket_price", {}).get("value", 0) / 100))
+                        if event_data.get("ticket_availability", {}).get("maximum_ticket_price", {}).get("value")
+                        else None
+                    ),
                 }
                 events.append(event)
             except Exception as e:
